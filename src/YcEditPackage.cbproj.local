@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2018/12/01 12:46:19.000.875,=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\Package1PCH1.h</Transaction>
+    <Transaction>2018/12/01 12:46:19.000.790,=rtl.bpi</Transaction>
+    <Transaction>2018/12/01 12:46:44.000.308,C:\Users\Scott\Documents\Embarcadero\Studio\Projects\Package1PCH1.h=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEditPackagePCH1.h</Transaction>
+    <Transaction>2018/12/01 12:46:44.000.325,C:\Users\Scott\Documents\Embarcadero\Studio\Projects\Package1.cbproj=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEditPackage.cbproj</Transaction>
+    <Transaction>2018/12/01 12:47:14.000.432,=vcl.bpi</Transaction>
+    <Transaction>2018/12/01 12:47:14.000.390,=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEdit\YcEdit.cpp</Transaction>
+    <Transaction>2018/12/01 12:48:13.000.561,C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEditPackagePCH1.h=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEdit\YcEditPackagePCH1.h</Transaction>
+    <Transaction>2018/12/01 12:48:20.000.387,C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEditPackage.cbproj=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEdit\YcEditPackage.cbproj</Transaction>
+    <Transaction>2018/12/01 15:31:44.000.890,=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEdit\YcEditPrint.cpp</Transaction>
+    <Transaction>2018/12/01 15:50:33.000.283,C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEdit\YcPrint.cpp=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEdit\YcEditPrint.cpp</Transaction>
+    <Transaction>2018/12/02 23:37:26.000.973,=C:\Users\Scott\Documents\Embarcadero\Studio\Projects\YcEdit\YcPosition.cpp</Transaction>
+  </Transactions>
+</BorlandProject>
