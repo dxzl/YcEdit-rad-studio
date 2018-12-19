@@ -1236,6 +1236,13 @@ void __fastcall TYcEdit::SetWordWrapTo(TWordWrapTo wwtType)
   FWordWrapTo = wwtType;
 }
 //---------------------------------------------------------------------------
+// set word wrap to none, window, or printer page
+//
+TWordWrapTo __fastcall TYcEdit::GetWordWrapTo(void)
+{
+  return FWordWrapTo;
+}
+//---------------------------------------------------------------------------
 // set ScrollBars
 //void __fastcall TYcEdit::SetScrollBars(TScrollStyle Value)
 //{

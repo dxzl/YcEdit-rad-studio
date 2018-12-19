@@ -1,5 +1,5 @@
 // I believe we can safely construe that this software may be released under
-// the Free Software Foundation's GPL - I adopted YcEdit for my project
+// the Free Software Foundation's GPL - I adopted TaeRichEdit for my project
 // more than 15 years ago and have made significant changes in various
 // places. Below is the original license. (Scott Swift 2015 dxzl@live.com)
 //===========================================================================
@@ -8,7 +8,7 @@
 // See http://home.att.net/~robertdunn/Yacs.html for the most current version.
 //===========================================================================
 //---------------------------------------------------------------------------
-// YcPrint.cpp - implementation file for YcPrint.cpp
+// TaeRichEditPrint.cpp - implementation file for TaeRichEditPrint.cpp
 // (print and print preview support).
 //---------------------------------------------------------------------------
 // 20 * points = twips
@@ -94,14 +94,14 @@ void __fastcall TYcPrint::SetMargins(TRect margins)
   CalcRects();
 
   // if wrapping to printer, force wrap to recalculate width
-  if (FRichEdit->WordWrapMode == wwtPrinter)
-    FRichEdit->WordWrapMode = wwtPrinter;
+  if (FRichEdit->WordWrapTo == wwtPrinter)
+    FRichEdit->WordWrapTo = wwtPrinter;
 }
 //---------------------------------------------------------------------------
 // set the rendering dc -- this is generally the display dc and it must
 // remain valid indefinitely
 //
-// This is the property setter for RendDC which is set in YcPrintDlg.cpp
+// This is the property setter for RendDC which is set in TaePrintDlg.cpp
 void __fastcall TYcPrint::SetRendDC(HDC rendDC)
 {
   if (rendDC == FRendDC)
@@ -434,7 +434,7 @@ int __fastcall TYcPrint::GetPrinterPageCount(void)
 // S.S. a good reference:
 //        https://msdn.microsoft.com/en-us/library/ms996492.aspx
 //
-// Called from YcPrintDialog.cpp from the Execute method
+// Called from TaePrintDialog.cpp from the Execute method
 bool TYcPrint::PrintToPrinter(WideString spoolTitle, int startPage,
                                         int endPage, int copies, bool collate)
 {
@@ -446,7 +446,7 @@ bool TYcPrint::PrintToPrinter(WideString spoolTitle, int startPage,
 
   FInfo = GetInfo(); // refresh constants
 
-  // S.S. I checked and this DOES call the CalcRects in YcEditAdvPrint.cpp
+  // S.S. I checked and this DOES call the CalcRects in TaeRichEditAdvPrint.cpp
   // (which is what we want because it will call its base CalcRects in this
   // file first then calc the rects for the header and footer.)
 
@@ -632,7 +632,7 @@ bool TYcPrint::RenderPage(HDC hdc, int w, int h, int page)
   fr.hdc = hdc;
   fr.hdcTarget = Printer()->Handle;
 
-  // Calls overridden version in YcEditAdvPrint.cpp!
+  // Calls overridden version in TaeRichEditAdvPrint.cpp!
   // fr.rc is the area within the rcPage rectangle to render to.
   // fr.rcPage is the entire area of a page on the rendering device.
   // Units are measured in twips.
@@ -751,7 +751,7 @@ bool TYcPrint::RenderPage(HDC hdc, int w, int h, int page)
 // (if, for example, the requested margins are wider than the printer
 // can handle).
 //
-// S.S. This IS overriden in YcEditAdvPrint.cpp!
+// S.S. This IS overriden in TaeRichEditAdvPrint.cpp!
 // This will SET FRendRect!
 void TYcPrint::CalcRects(void)
 {
@@ -816,7 +816,7 @@ void TYcPrint::CalcRects(void)
 // to handle pages of different widths so applications that require pages
 // to have different rendering widths should not support SetWordWrapToPrinter().
 //
-// S.S. NOTE - This gets overridden in YcEditAdvPrint.cpp!!!!!
+// S.S. NOTE - This gets overridden in TaeRichEditAdvPrint.cpp!!!!!
 TRect __fastcall TYcPrint::GetRendRect(HDC hdc, int /*page*/)
 {
   FRendRect = GetRendRect(hdc, FMargins, FRendWidth, FRendHeight);
@@ -1005,4 +1005,5 @@ HDC __fastcall TYcPrint::CreatePrinterDC(void)
 }
 */
 //---------------------------------------------------------------------------
+
 

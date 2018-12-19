@@ -65,8 +65,9 @@ class PACKAGE TYcEdit : public TCustomRichEdit
     void __fastcall SetInsertMode(bool value);
     void __fastcall SetPosition(YCPOSITION pos);
     YCPOSITION __fastcall GetPosition(void);
-    void __fastcall SetWordWrapTo(TWordWrapTo wwtType);
     void SetWordWrapToPrinter(void);
+    void __fastcall SetWordWrapTo(TWordWrapTo wwtType);
+    TWordWrapTo __fastcall GetWordWrapTo(void);
     void __fastcall SetPrintSupport(bool Value);
     void __fastcall Init(TComponent* Owner, String sName);
     void __fastcall ToggleInsertMode(void);
@@ -132,6 +133,7 @@ class PACKAGE TYcEdit : public TCustomRichEdit
             TSearchTypes2 searchOptions, int& foundPos, int& foundLength);
 
 //  __property TScrollStyle ScrollBars = { read = FScrollBars, write = SetScrollBars };
+  __property TWordWrapTo WordWrapTo = { read = GetWordWrapTo, write = SetWordWrapTo };
   __property int TabWidthTwips = { read = GetTabWidthTwips };
   __property int SelLength = { read = GetSelLength, write = SetSelLength };
   __property int SelStart = { read = GetSelStart, write = SetSelStart };
