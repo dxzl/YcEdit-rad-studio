@@ -2,6 +2,8 @@
 
 #include <System.hpp>
 #pragma hdrstop
+USEFORM("YcPrintCancelDlg.cpp", YcPrintCancelDialog);
+//---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 

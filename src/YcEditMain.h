@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
-#ifndef YcEditH
-#define YcEditH
+#ifndef YcEditMainH
+#define YcEditMainH
 
 #include <Classes.hpp>
 #include <StdCtrls.hpp>
@@ -14,10 +14,7 @@
 enum TSearchType2 { st2WholeWord, st2MatchCase, st2Backward };
 typedef Set<TSearchType2, stWholeWord, st2Backward> TSearchTypes2;
 
-// printer typedef
-//typedef TTaeRichEditAdvPrint TTaePrint;
-
-typedef int TTaeTabStops[MAX_TAB_STOPS];
+typedef int TYcTabStops[MAX_TAB_STOPS];
 typedef enum { wwtNone, wwtWindow, wwtPrinter } TWordWrapTo;
 
 class PACKAGE TYcEdit : public TCustomRichEdit
@@ -37,9 +34,9 @@ class PACKAGE TYcEdit : public TCustomRichEdit
     void __fastcall SetTextW(WideString wText);
     WideString __fastcall GetSelTextW(void);
     void __fastcall SetSelTextW(WideString wSelText);
-    int __fastcall GetTabStops(TTaeTabStops& tabStops);
+    int __fastcall GetTabStops(TYcTabStops& tabStops);
     void __fastcall SetTabStops(bool entireDocument = true); // S.S. (must set FTabWidth first!)
-    void __fastcall SetTabStops(int tabCount, TTaeTabStops &tabStops);
+    void __fastcall SetTabStops(int tabCount, TYcTabStops &tabStops);
     void __fastcall SetTabStops(int tabStopTwips);
     void __fastcall SetTabStops(int tabWidth, TFont* font, bool entireDocument = true);
     int __fastcall GetUndoLimit(void);
@@ -84,7 +81,7 @@ class PACKAGE TYcEdit : public TCustomRichEdit
 
     TScrollStyle FScrollBars;
     YCPOSITION FSavePos;
-    TTaeTabStops FTabStops;
+    TYcTabStops FTabStops;
     Classes::TNotifyEvent FSaveOnChange;
     String FFileName; // storage space for the file being edited (if any)
 
@@ -98,6 +95,9 @@ class PACKAGE TYcEdit : public TCustomRichEdit
     __fastcall TYcEdit(TComponent* Owner); // constructor
     __fastcall TYcEdit(TComponent* Owner, String sName); // constructor
     __fastcall ~TYcEdit();
+
+    // static class members
+    static const AnsiString Untitled;
 
     int __fastcall GetTabWidthTwipsEx(int tabWidth, TFont* font);
     long __fastcall GetLineByIndex(long Index);

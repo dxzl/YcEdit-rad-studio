@@ -13,11 +13,14 @@
 // Include header files common to all files before this directive!
 #pragma hdrstop
 
-#include "YcEdit.h"
+#include "YcEditMain.h"
 #include "YcPrint.h"
 
 #pragma package(smart_init)
 
+//---------------------------------------------------------------------------
+const AnsiString TYcEdit::Untitled = "(untitled)";
+//---------------------------------------------------------------------------
 //TCustomRichEdit introduces new properties and methods to expand the
 //capabilities of TCustomMemo for rich text.
 //Do not create instances of TCustomRichEdit. Use TCustomRichEdit as a base
@@ -42,7 +45,7 @@ static inline void ValidCtrCheck(TYcEdit *)
   new TYcEdit((TComponent*)NULL);
 }
 //---------------------------------------------------------------------------
-namespace Ycedit
+namespace Yceditmain
 {
   void __fastcall PACKAGE Register()
   {
@@ -733,7 +736,7 @@ void __fastcall TYcEdit::SetTabStops(int tabWidth, TFont* font, bool entireDocum
 // Set tab-stops equal-size and in twips
 void __fastcall TYcEdit::SetTabStops(int tabStopTwips)
 {
-  TTaeTabStops tabs;
+  TYcTabStops tabs;
 
   int ii;
 
@@ -744,7 +747,7 @@ void __fastcall TYcEdit::SetTabStops(int tabStopTwips)
 }
 //---------------------------------------------------------------------------
 // Set X tab-stops via an array
-void __fastcall TYcEdit::SetTabStops(int tabCount, TTaeTabStops &tabStops)
+void __fastcall TYcEdit::SetTabStops(int tabCount, TYcTabStops &tabStops)
 {
   PARAFORMAT2 pfmt;
   pfmt.cbSize = sizeof(pfmt);
@@ -938,7 +941,7 @@ void __fastcall TYcEdit::CopyToStream(TStream* stream, bool selectionOnly,
 // characters.
 //ATP_REPLACEALLTEXT 4 Replace trailing characters even if they are not
 // changed (uses the same formatting for the entire replacement string).
-//int CALLBACK TTaeRichEdit::AutoCorrectProc(LANGID langid, const WCHAR *pszBefore,
+//int CALLBACK TYcRichEdit::AutoCorrectProc(LANGID langid, const WCHAR *pszBefore,
 //           WCHAR *pszAfter, LONG cchAfter, LONG *pcchReplaced)
 //{
 //  return 0;
@@ -1060,7 +1063,7 @@ void __fastcall TYcEdit::SetPosition(YCPOSITION pos)
 // locate text in the control
 //
 /*
-int __fastcall TTaeRichEdit::FindText(AnsiString text, int StartPos,
+int __fastcall TYcRichEdit::FindText(AnsiString text, int StartPos,
   int Length, TSearchTypes2 searchOptions)
 {
 #if __BORLANDC__ < 0x0550
@@ -1255,12 +1258,16 @@ void __fastcall TYcEdit::SetPrintSupport(bool Value)
   if (Value == true)
   {
     if (!FYcPrint)
+    {
       FYcPrint = new TYcPrint(this);
+      FPrintSupport = true;
+    }
   }
   else if (FYcPrint)
   {
     delete FYcPrint;
     FYcPrint = NULL;
+    FPrintSupport = false;
   }
 }
 //---------------------------------------------------------------------------

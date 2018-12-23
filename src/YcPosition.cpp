@@ -11,7 +11,7 @@
 #include <vcl.h>
 #pragma hdrstop
 
-#include "YcEdit.h"
+#include "YcEditMain.h"
 #include "YcPosition.h"
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -25,20 +25,19 @@ __fastcall TYcPosition::TYcPosition(TYcEdit* re)
 YCPOSITION __fastcall TYcPosition::GetPosition(void)
 {
   YCPOSITION pos;
-  
+
   // get the line offset in pos.y and the x-offset into the line in pos.x
   TCharRange CharRange;
   ::SendMessage(re_handle, EM_EXGETSEL, 0, (LPARAM)&CharRange);
-  
-  pos.p.x = CharRange.cpMax -
-                            ::SendMessage(re_handle, EM_LINEINDEX, -1, 0);
-  pos.p.y = SendMessage(re_handle, EM_LINEFROMCHAR, -1, 0);
-  
+
+  pos.p.x = CharRange.cpMax - ::SendMessage(re_handle, EM_LINEINDEX, -1, 0);
+  pos.p.y = ::SendMessage(re_handle, EM_LINEFROMCHAR, -1, 0);
+
   pos.start = CharRange.cpMin;
-  pos.end = CharRange.cpMax;  
-  pos.firstVisLine = SendMessage(re_handle, EM_GETFIRSTVISIBLELINE, 0, 0);
+  pos.end = CharRange.cpMax;
+  pos.firstVisLine = ::SendMessage(re_handle, EM_GETFIRSTVISIBLELINE, 0, 0);
   savePos = pos; // Save it for SetPosition to use...
-  
+
   return pos;
 }
 //---------------------------------------------------------------------------
@@ -47,10 +46,10 @@ void __fastcall TYcPosition::SetPosition(YCPOSITION pos)
 {
   // Don't want to restore SelStart and SelLength if it's become "unknown",
   // so the invoking class clears this flag...
-  if ( !bRestoreSel )
+  if (!bRestoreSel)
   {
     // Set SelStart to beginning of the line we were on... no selection
-    pos.start = SendMessage(re_handle, EM_LINEINDEX, (WPARAM)savePos.p.y, 0);
+    pos.start = ::SendMessage(re_handle, EM_LINEINDEX, (WPARAM)savePos.p.y, 0);
     pos.end = pos.start;
   }
 
@@ -59,7 +58,7 @@ void __fastcall TYcPosition::SetPosition(YCPOSITION pos)
   CharRange.cpMin = pos.start;
   ::SendMessage(re_handle, EM_EXSETSEL, 0, (LPARAM)&CharRange);
 
-  int newPos = SendMessage(re_handle, EM_GETFIRSTVISIBLELINE, 0, 0);
+  int newPos = ::SendMessage(re_handle, EM_GETFIRSTVISIBLELINE, 0, 0);
   ::SendMessage(re_handle, EM_LINESCROLL, 0, savePos.firstVisLine-newPos);
 }
 //---------------------------------------------------------------------------

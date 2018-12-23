@@ -1,145 +1,81 @@
-// I believe we can safely construe that this software may be released under
-// the Free Software Foundation's GPL - I adopted YcEdit for my project
-// more than 15 years ago and have made significant changes in various
-// places. Below is the original license. (Scott Swift 2015 dxzl@live.com)
 //===========================================================================
 // Copyright © 1999 Thin Air Enterprises and Robert Dunn.  All rights reserved.
 // Free for non-commercial use.  Commercial use requires license agreement.
 // See http://home.att.net/~robertdunn/Yacs.html for the most current version.
 //===========================================================================
 //---------------------------------------------------------------------------
-// YcPrint.h - header file for YcPrint.cpp (print and
-// print preview support).
+// TaeRichEditAdvPrint.h - header file for TaeRichEditAdvPrint.cpp (advanced
+// print and print preview functionality).
 //
-// note:  the TRichEditPrint class works in TWIPs, not pixels or some other
-// unit of measure.  the class includes methods to convert between TWIPs and
-// other units. 
+// note:  the TRichEditAdvPrint class works in TWIPs, not pixels or some other
+// unit of measure.  the TRichEditPrint class includes methods to convert
+// between TWIPs and other units.
 //---------------------------------------------------------------------------
 #ifndef YcPrintH
 #define YcPrintH
 
-#include <ComCtrls.hpp>
-#include <Printers.hpp>
-#include <Math.hpp>
-#include <vector>
-#include <values.h>
+#include "YcCustomPrint.h"
+#include "YcPageLayout.h"
 //---------------------------------------------------------------------------
-//typedef enum _Process_DPI_Awareness {
-//  Process_DPI_Unaware            = 0,
-//  Process_System_DPI_Aware       = 1,
-//  Process_Per_Monitor_DPI_Aware  = 2
-//} Process_DPI_Awareness;
-
-typedef struct tagTYcPageOffset
+typedef struct tagTYcPageRects
 {
-  long int Start;
-  long int End;
-} TYcPageOffsets;
+  TRect HeaderBorder;
+  TRect BodyBorder;
+  TRect FooterBorder;
+  TRect HeaderRender;
+  TRect BodyRender;
+  TRect FooterRender;
+} TYcPageRects;
 
-typedef struct tagTTaeInfoDC
-{
-  long int xLogPix;
-  long int yLogPix;
-  long int xPhysPage;
-  long int yPhysPage;
-  long int xMinMargin;
-  long int yMinMargin;
-} TYcInfoDC;
-
-typedef struct tagTPageOffset
-{
-  long int Start;
-  long int End;
-  RECT rendRect;
-} TPageOffsets;
-
-typedef TYcPageOffsets TTaePageRange;
-
-typedef void __fastcall (__closure *TOnPageEvent)(TObject* Sender, HDC hdc, int page);
-
-class TYcPrint : public TPersistent
+class PACKAGE TYcPrint : public TYcCustomPrint
 {
 friend class PACKAGE TYcEdit;
 
 protected:
-  TYcEdit* FRichEdit;  // the rich edit control associated with this instance
-  TRect FMargins;        // requested margins in twips
-  TRect FRendRect;      // render rect in twips
-  TRect FPageRect;      // page rect in twips
-  TPoint FPrinterOffset;    // offset of printed page in printer device units
-  std::vector<TYcPageOffsets> FPageOffsets;
-  HDC FRendDC;        // rendering hdc
-  bool FPrinting, FShowMargins;
-  int FRendWidth, FRendHeight; // in device units (pixels)
-  int FScaleX, FScaleY;
-  bool FAbortPrint;
+  TYcHeaderText* FHeader;
+  TYcHeaderText* FFooter;
+  TYcHeaderText* FFirstHeader;
+  TYcHeaderText* FFirstFooter;
+  bool FUseFirstHeader;
+  bool FNeedToCalcDrawRects;
+  TYcBorderLines FBorders;
+  int FInsideMargin;
+  int FBorderWidth;
 
-  TYcInfoDC FInfo;
+  void __fastcall SetHeader(TYcHeaderText* header) { SetAHeader(FHeader, header); };
+  void __fastcall SetFooter(TYcHeaderText* footer) { SetAHeader(FFooter, footer); };
+  void __fastcall SetFirstHeader(TYcHeaderText* header) { SetAHeader(FFirstHeader, header); };
+  void __fastcall SetFirstFooter(TYcHeaderText* footer) { SetAHeader(FFirstFooter, footer); };
+  void __fastcall SetAHeader(TYcHeaderText* headerFooter, TYcHeaderText* newHeaderFooter);
+
+  virtual TRect __fastcall GetRendRect(HDC hdc, int page);
+  virtual void DrawMargins(HDC hdc, int page, TRect margins);
 
   virtual void CalcRects(void);
-  virtual TRect __fastcall GetRendRect(HDC hdc, int page);
-  TRect __fastcall GetRendRect(HDC hdc, TRect rMargins, int &w, int &h);
-  virtual long int FormatRange(TFormatRange& formatRange, bool render);
-  virtual void ClearRenderingCache(void);
-  void __fastcall SetMargins(TRect margins);
-  HDC GetTargDC(void);
-  HDC __fastcall CreatePrinterDC(void);
-  void __fastcall SetRendDC(HDC rendDC);
-  void __fastcall SetShowMargins(bool showMargins);
-  TYcInfoDC __fastcall GetInfo(void);
-  TYcInfoDC __fastcall GetInfo(HDC hdc);
-  int __fastcall GetPageCount(void);
-//  int __fastcall GetPrinterPageCount(void);
-  virtual void DrawMargins(HDC hdc, int page, TRect margins);
-  CHARRANGE __fastcall GetSelRange(void);
-  int __fastcall GetSelStartPage(void);
-  int __fastcall GetSelEndPage(void);
-  TOnPageEvent FOnBeforePage;
-  TOnPageEvent FOnAfterPage;
-  TNotifyEvent FOnStartPrint;
-  TNotifyEvent FOnEndPrint;
-  virtual void BeforePage(HDC hdc, int page);
-  virtual void AfterPage(HDC hdc, int page);
+  void CalcDrawRects(HDC hdc);
+  void CalcRectsForPage(TYcHeaderText* header, TYcHeaderText* footer,
+    TYcPageRects& pageRects, TYcBorderLines borderLines, TRect renderRect);
+  int GetTextHeight(TYcHeaderText* header);
+  int DrawHeader(HDC hdc, TYcHeaderText* header, TRect rect);
+  void DrawBorders(HDC hdc, TYcPageRects& pageRects, TYcBorderLines lines);
   virtual void StartPrint(void);
-  virtual void EndPrint(void);
+  virtual void AfterPage(HDC hdc, int page);
 
 public:
   __fastcall TYcPrint(TYcEdit* Owner);
-  __fastcall ~TYcPrint(void);
-  virtual bool RenderPage(HDC hdc, int w, int h, int page);
-  virtual bool PaginateTo(int page);
-  ::TTaePageRange __fastcall GetOffsetPages(CHARRANGE chrg);
-  ::TTaePageRange __fastcall GetOffsetPages(int begOffset = 1, int endOffset = MAXINT);
+  __fastcall ~TYcPrint();
 
-  virtual void BeginRender(int maxPages);
-  virtual void EndRender(void);
-  bool PrintToPrinter(WideString spoolTitle = "", int startPage = 1,
-    int endPage = MAXINT, int copies = 1, bool collate = false);
-
-  TRect TwipsToRenderRect(TRect rect);
-  TRect TwipsToTargetRect(HDC hdc, TRect rect);
-
-  __property TRect Margins = { read = FMargins, write = SetMargins, nodefault };
-  __property HDC RendDC = { read = FRendDC, write = SetRendDC, nodefault };
-  __property TRect TargetRendRect = { read = FRendRect };
-  __property TRect TargetPageRect = { read = FPageRect };
-  __property int PageCount = { read = GetPageCount };
-//  __property int PrinterPageCount = { read = GetPrinterPageCount };
-  __property int RendWidth = { read = FRendWidth, write = FRendWidth, nodefault };
-  __property int RendHeight = { read = FRendHeight, write = FRendHeight, nodefault };
-  __property int SelStartPage = { read = GetSelStartPage };
-  __property int SelEndPage = { read = GetSelEndPage };
-  __property int ScaleX = { read = FScaleX, write = FScaleX };
-  __property int ScaleY = { read = FScaleY, write = FScaleY };
-  __property bool AbortPrint = { read = FAbortPrint, write = FAbortPrint, nodefault };
-  __property bool Printing = { read = FPrinting };
+  void SetPageStyle(TYcPageStyle& style);
 
 __published:
-  __property bool ShowMargins = { read = FShowMargins, write = SetShowMargins, nodefault };
-  __property TOnPageEvent OnBeforePage = { read = FOnBeforePage, write = FOnBeforePage, nodefault };
-  __property TOnPageEvent OnAfterPage = { read = FOnAfterPage, write = FOnAfterPage, nodefault };
-  __property TNotifyEvent OnStartPrint = { read = FOnStartPrint, write = FOnStartPrint, nodefault };
-  __property TNotifyEvent OnEndPrint = { read = FOnEndPrint, write = FOnEndPrint, nodefault };
+  __property TYcHeaderText* Header = { read = FHeader, write = SetHeader, nodefault };
+  __property TYcHeaderText* Footer = { read = FFooter, write = SetFooter, nodefault };
+  __property TYcHeaderText* FirstHeader = { read = FFirstHeader, write = SetFirstHeader, nodefault };
+  __property TYcHeaderText* FirstFooter = { read = FFirstFooter, write = SetFirstFooter, nodefault };
+  __property bool UseFirstHeaderFooter = { read = FUseFirstHeader, write = FUseFirstHeader, default = false };
+  __property TYcBorderLines Borders = { read = FBorders, write = FBorders, nodefault };
+  __property int InsideMargin = { read = FInsideMargin, write = FInsideMargin, default = 100 };
+  __property int BorderWidth = { read = FBorderWidth, write = FBorderWidth, default = 1 };
 };
 //---------------------------------------------------------------------------
 #endif
