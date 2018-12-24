@@ -28,7 +28,7 @@ protected:
   TStringList* FRight;
   TFont* FFont;  // TYcHeaderText owns only the font it creates -- others are TFont::Assign()'ed
 
-  void __fastcall SetText(AnsiString text);
+  void __fastcall SetText(String text);
   void __fastcall SetLeft(TStringList* stringList) { SetStringList(FLeft, stringList); };
   void __fastcall SetCenter(TStringList* stringList) { SetStringList(FCenter, stringList); };
   void __fastcall SetRight(TStringList* stringList) { SetStringList(FRight, stringList); };
@@ -38,16 +38,16 @@ protected:
 public:
   __fastcall TYcHeaderText(void);
   virtual __fastcall ~TYcHeaderText(void);
-  __property AnsiString Text = { read = GetText, write = SetText };
+  __property String Text = { read = GetText, write = SetText };
 
   // assignment operator
   TYcHeaderText& operator=(TYcHeaderText& header);
   // copy constructor
   TYcHeaderText(const TYcHeaderText& header);
-  AnsiString __fastcall GetText(void);
+  String __fastcall GetText(void);
 
-  void LoadFromRegistry(TRegistry& reg, AnsiString name);
-  void SaveToRegistry(TRegistry&reg, AnsiString name);
+  void LoadFromRegistry(TRegistry& reg, String name);
+  void SaveToRegistry(TRegistry&reg, String name);
 
 __published:
   __property TStringList* Left = { read = FLeft, write = SetLeft, nodefault };
@@ -70,7 +70,7 @@ typedef Set<TYcBorderLine, blHeaderLeft, blFooterBottom> TYcBorderLines;
 class PACKAGE TYcPageStyle {
 protected:
 public:
-  AnsiString FName;
+  String FName;
   TYcHeaderText* FFirstHeader;
   TYcHeaderText* FFirstFooter;
   TYcHeaderText* FHeader;
@@ -88,9 +88,9 @@ public:
   // copy constructor
   TYcPageStyle(const TYcPageStyle& style);
 
-  void LoadFromRegistry(TRegistry& reg, AnsiString name);
-  void SaveToRegistry(TRegistry& reg, AnsiString name);
-  static void RemoveFromRegistry(TRegistry& reg, AnsiString name);
+  void LoadFromRegistry(TRegistry& reg, String name);
+  void SaveToRegistry(TRegistry& reg, String name);
+  static void RemoveFromRegistry(TRegistry& reg, String name);
 };
 
 // TYcPageStyles list typedef -- used to store a list of program-defined or
@@ -101,11 +101,11 @@ typedef std::vector<TYcPageStyle*> TYcPageStyles;
 // TYcPageStyleList class -- manages a list of page styles
 class PACKAGE TYcPageStyleList {
 protected:
-  AnsiString FCurrentStyleName;
+  String FCurrentStyleName;
   TYcPageStyles FPageStyles;
 
   TYcPageStyle* GetCurrentStyle(void) { return Find(FCurrentStyleName); };
-  void SetCurrentStyleName(AnsiString name) {
+  void SetCurrentStyleName(String name) {
     if (name == "") return;
     if (Find(name)) FCurrentStyleName = name;
     };
@@ -115,17 +115,17 @@ public:
   ~TYcPageStyleList();
   void Clear(void);
   void Add(TYcPageStyle& style);
-  TYcPageStyle* Find(AnsiString styleName);
+  TYcPageStyle* Find(String styleName);
   void Change(TYcPageStyle& style, bool add = false);
-  void Delete(AnsiString styleName);
-  bool StyleExists(AnsiString styleName);
+  void Delete(String styleName);
+  bool StyleExists(String styleName);
   int Count(void);
-  AnsiString StyleName(int index);
+  String StyleName(int index);
 
-  void LoadFromRegistry(TRegistry& reg, AnsiString name);
-  void SaveToRegistry(TRegistry& reg, AnsiString name);
+  void LoadFromRegistry(TRegistry& reg, String name);
+  void SaveToRegistry(TRegistry& reg, String name);
 
-  __property AnsiString CurrentStyleName = { read = FCurrentStyleName,
+  __property String CurrentStyleName = { read = FCurrentStyleName,
     write = SetCurrentStyleName };
   __property TYcPageStyle* CurrentStyle = { read = GetCurrentStyle };
 };

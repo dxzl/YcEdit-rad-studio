@@ -58,15 +58,15 @@ void __fastcall TYcHeaderText::SetFont(TFont* font)
 // scan text looking adding escapeChar before any charToEscape's not
 // already preceded with escapeChar
 //
-static AnsiString AddCharEscapes(AnsiString text, char escapeChar, char charToEscape)
+static String AddCharEscapes(String text, Char escapeChar, Char charToEscape)
 {
   // allocate a buffer twice the size of the string
   int size = text.Length() * 2;
-  char* buf = new char[size + 2];
-  char* pBuf = buf;
+  Char* buf = new Char[size + 2];
+  Char* pBuf = buf;
 
   // get char buffer from text
-  char* pText = text.c_str();
+  Char* pText = text.c_str();
 
   // march through pText doing copies and substitutions into pBuf
   do {
@@ -82,7 +82,7 @@ static AnsiString AddCharEscapes(AnsiString text, char escapeChar, char charToEs
   buf[size + 1] = '\0';
 
   // copy to temporary and release allocated storage
-  AnsiString retVal(buf);
+  String retVal(buf);
   delete[] buf;
 
   // return temporary
@@ -91,7 +91,7 @@ static AnsiString AddCharEscapes(AnsiString text, char escapeChar, char charToEs
 //---------------------------------------------------------------------------
 // break into parts at '|' (unless escaped with '\')
 //
-void __fastcall TYcHeaderText::SetText(AnsiString text)
+void __fastcall TYcHeaderText::SetText(String text)
 {
   // clear current values
   FLeft->Clear();
@@ -100,13 +100,13 @@ void __fastcall TYcHeaderText::SetText(AnsiString text)
 
   // allocate working buffer
   int size = text.Length();
-  char* buf = new char[size + 1];
-  char* pBuf = buf;
-  char* bBuf;
-  char c;
+  Char* buf = new Char[size + 1];
+  Char* pBuf = buf;
+  Char* bBuf;
+  Char c;
 
   // copy into working buffer
-  strncpy(buf, text.c_str(), size);
+  StrLCopy(buf, text.c_str(), size);
   buf[size] = '\0';
 
   // find first '|' not preceded by '\'
@@ -162,7 +162,7 @@ void __fastcall TYcHeaderText::SetText(AnsiString text)
 //---------------------------------------------------------------------------
 // return left, center, & right text as a single string delimited by '|';
 // escapes added as needed
-AnsiString __fastcall TYcHeaderText::GetText(void)
+String __fastcall TYcHeaderText::GetText(void)
 {
 return AddCharEscapes(FLeft->Text, '\\', '|') + "|" +
   AddCharEscapes(FCenter->Text, '\\', '|') + "|" +
@@ -205,9 +205,9 @@ TYcHeaderText::TYcHeaderText(const TYcHeaderText& header)
 //---------------------------------------------------------------------------
 // load TYcHeaderText information from the registry
 //
-void TYcHeaderText::LoadFromRegistry(TRegistry& reg, AnsiString name)
+void TYcHeaderText::LoadFromRegistry(TRegistry& reg, String name)
 {
-  // load text -- apparently AnsiString s = TRegistry::ReadString (or maybe
+  // load text -- apparently String s = TRegistry::ReadString (or maybe
   // TRegistry::WriteString()) does not handle special characters, e.g.,
   // "\r\n", correctly -- use the left, center, and right members rather
   // than the Text property or SetText() method
@@ -221,9 +221,9 @@ void TYcHeaderText::LoadFromRegistry(TRegistry& reg, AnsiString name)
 //---------------------------------------------------------------------------
 // save TYcHeaderText information to the registry
 //
-void TYcHeaderText::SaveToRegistry(TRegistry& reg, AnsiString name)
+void TYcHeaderText::SaveToRegistry(TRegistry& reg, String name)
 {
-  // save text -- apparently AnsiString s = TRegistry::ReadString (or maybe
+  // save text -- apparently String s = TRegistry::ReadString (or maybe
   // TRegistry::WriteString()) does not handle special characters, e.g.,
   // "\r\n", correctly -- use the left, center, and right members rather
   // than the Text property or GetText() method
@@ -300,7 +300,7 @@ TYcPageStyle::TYcPageStyle(const TYcPageStyle& style)
 //---------------------------------------------------------------------------
 // load TYcPageStyle information from the registry
 //
-void TYcPageStyle::LoadFromRegistry(TRegistry& reg, AnsiString name)
+void TYcPageStyle::LoadFromRegistry(TRegistry& reg, String name)
 {
   FName = RegValueExists(reg, name + "Name").ReadString(name + "Name");
   FFirstHeader->LoadFromRegistry(reg, name + "Header1");
@@ -343,7 +343,7 @@ void TYcPageStyle::LoadFromRegistry(TRegistry& reg, AnsiString name)
 //---------------------------------------------------------------------------
 // save TYcPageStyle information to the registry
 //
-void TYcPageStyle::SaveToRegistry(TRegistry& reg, AnsiString name)
+void TYcPageStyle::SaveToRegistry(TRegistry& reg, String name)
 {
   reg.WriteString(name + "Name", FName);
   FFirstHeader->SaveToRegistry(reg, name + "Header1");
@@ -373,7 +373,7 @@ void TYcPageStyle::SaveToRegistry(TRegistry& reg, AnsiString name)
 //---------------------------------------------------------------------------
 // remove TYcPageStyle information from the registry
 //
-void TYcPageStyle::RemoveFromRegistry(TRegistry& reg, AnsiString name)
+void TYcPageStyle::RemoveFromRegistry(TRegistry& reg, String name)
 {
   if (reg.ValueExists(name + "Name")) reg.DeleteValue(name + "Name");
   if (reg.ValueExists(name + "Header1")) reg.DeleteValue(name + "Header1");
@@ -441,10 +441,10 @@ void TYcPageStyleList::Add(TYcPageStyle& style)
 //---------------------------------------------------------------------------
 // locate a style by name
 //
-TYcPageStyle* TYcPageStyleList::Find(AnsiString styleName)
+TYcPageStyle* TYcPageStyleList::Find(String styleName)
 {
   for (TYcPageStyles::iterator ps = FPageStyles.begin(); ps < FPageStyles.end(); ps++)
-    if (!(*ps)->FName.AnsiCompare(styleName)) return *ps;
+    if (!(*ps)->FName.Compare(styleName)) return *ps;
   return 0;
 }
 //---------------------------------------------------------------------------
@@ -459,11 +459,11 @@ void TYcPageStyleList::Change(TYcPageStyle& style, bool add)
 //---------------------------------------------------------------------------
 // delete a style from the list
 //
-void TYcPageStyleList::Delete(AnsiString styleName)
+void TYcPageStyleList::Delete(String styleName)
 {
   // need to change to select another style and prevent deleting all...
   for (TYcPageStyles::iterator ps = FPageStyles.begin(); ps < FPageStyles.end(); ps++) {
-    if (!(*ps)->FName.AnsiCompare(styleName)) {
+    if (!(*ps)->FName.Compare(styleName)) {
       delete *ps;
       FPageStyles.erase(ps);
       return;
@@ -473,11 +473,11 @@ void TYcPageStyleList::Delete(AnsiString styleName)
 //---------------------------------------------------------------------------
 // determine if a named style is in the list
 //
-bool TYcPageStyleList::StyleExists(AnsiString styleName)
+bool TYcPageStyleList::StyleExists(String styleName)
 {
   if (!FPageStyles.size()) return false;
   for (TYcPageStyles::iterator ps = FPageStyles.begin(); ps < FPageStyles.end(); ps++)
-    if (!(*ps)->FName.AnsiCompare(styleName)) return true;
+    if (!(*ps)->FName.Compare(styleName)) return true;
   return false;
 }
 //---------------------------------------------------------------------------
@@ -490,7 +490,7 @@ int TYcPageStyleList::Count(void)
 //---------------------------------------------------------------------------
 // get the style name of the nth entry
 //
-AnsiString TYcPageStyleList::StyleName(int index)
+String TYcPageStyleList::StyleName(int index)
 {
   if (index >= Count()) return "";
   return FPageStyles[index]->FName;
@@ -498,13 +498,13 @@ AnsiString TYcPageStyleList::StyleName(int index)
 //---------------------------------------------------------------------------
 // load a list of styles from the registry
 //
-void TYcPageStyleList::LoadFromRegistry(TRegistry& reg, AnsiString name)
+void TYcPageStyleList::LoadFromRegistry(TRegistry& reg, String name)
 {
   int cnt = RegValueExists(reg, name + "Count").ReadInteger(name + "Count");
   TYcPageStyle style;
 
   for (int i = 0; i < cnt; i++) {
-    style.LoadFromRegistry(reg, name + AnsiString(i));
+    style.LoadFromRegistry(reg, name + String(i));
     Add(style);
     }
 
@@ -513,17 +513,17 @@ void TYcPageStyleList::LoadFromRegistry(TRegistry& reg, AnsiString name)
 //---------------------------------------------------------------------------
 // save the list of styles to the registry
 //
-void TYcPageStyleList::SaveToRegistry(TRegistry& reg, AnsiString name)
+void TYcPageStyleList::SaveToRegistry(TRegistry& reg, String name)
 {
   // save the list of styles
   int i = 0;
   for (TYcPageStyles::iterator ps = FPageStyles.begin(); ps < FPageStyles.end(); ps++)
-    (*ps)->SaveToRegistry(reg, name + AnsiString(i++));
+    (*ps)->SaveToRegistry(reg, name + String(i++));
 
   // delete any stray entries
   int prevCnt = 0;
   if (reg.ValueExists(name + "Count")) prevCnt = reg.ReadInteger(name + "Count");
-  while (i < prevCnt) TYcPageStyle::RemoveFromRegistry(reg, name + AnsiString(i++));
+  while (i < prevCnt) TYcPageStyle::RemoveFromRegistry(reg, name + String(i++));
 
   // write the new count and style
   reg.WriteInteger(name + "Count", FPageStyles.size());
