@@ -283,9 +283,9 @@ int TYcPrint::DrawHeader(HDC hdc, TYcHeaderText* header,
   if (rect.Top == rect.Bottom) return 0;
 
   // get the three parts of the header and remove trailing "\r\n"
-  AnsiString LeftText = Parser.Parse(header->Left->Text).TrimRight();
-  AnsiString CenterText = Parser.Parse(header->Center->Text).TrimRight();
-  AnsiString RightText = Parser.Parse(header->Right->Text).TrimRight();
+  String LeftText = Parser.Parse(header->Left->Text).TrimRight();
+  String CenterText = Parser.Parse(header->Center->Text).TrimRight();
+  String RightText = Parser.Parse(header->Right->Text).TrimRight();
 
   // save dc
   ::SaveDC(hdc);
@@ -309,15 +309,15 @@ int TYcPrint::DrawHeader(HDC hdc, TYcHeaderText* header,
   dtp.uiLengthDrawn = 0;
 
   // draw left text (returns zero on fail -- ignore???)
-  int vHtLeft = ::DrawTextEx(hdc, LeftText.c_str(), -1, (RECT*) &rect,
+  int vHtLeft = ::DrawTextExW(hdc, LeftText.c_str(), -1, (RECT*) &rect,
     DT_LEFT | DT_TABSTOP | DT_NOPREFIX | DT_EXPANDTABS | DT_TOP, &dtp);
 
   // draw center text
-  int vHtCenter = ::DrawTextEx(hdc, CenterText.c_str(), -1, (RECT*) &rect,
+  int vHtCenter = ::DrawTextExW(hdc, CenterText.c_str(), -1, (RECT*) &rect,
     DT_CENTER | DT_TABSTOP | DT_NOPREFIX | DT_EXPANDTABS | DT_TOP, &dtp);
 
   // draw right text
-  int vHtRight = ::DrawTextEx(hdc, RightText.c_str(), -1, (RECT*) &rect,
+  int vHtRight = ::DrawTextExW(hdc, RightText.c_str(), -1, (RECT*) &rect,
     DT_RIGHT | DT_TABSTOP | DT_NOPREFIX | DT_EXPANDTABS | DT_TOP, &dtp);
 
   // get vertical pixels per inch

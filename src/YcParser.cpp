@@ -18,19 +18,19 @@
 //---------------------------------------------------------------------------
 // constants representing text that can/will be replaced by parser
 //
-const char NameOpt[] =     "{name}";
-const char TitleOpt[] =    "{title}";
-const char CDateOpt[] =    "{cdate}";
-const char CTimeOpt[] =    "{ctime}";
-const char MDateOpt[] =    "{mdate}";
-const char MTimeOpt[] =    "{mtime}";
-const char PageOpt[] =     "{page}";
-const char PagesOpt[] =    "{pages}";
-const char TodayOpt[] =    "{today}";
-const char NowOpt[] =      "{now}";
-const char OpenEscOpt[] =   "{{";
-const char CloseEscOpt[] =  "}}";
-const char UserNameOpt[] =  "{user}";
+const Char NameOpt[] =     L"{name}";
+const Char TitleOpt[] =    L"{title}";
+const Char CDateOpt[] =    L"{cdate}";
+const Char CTimeOpt[] =    L"{ctime}";
+const Char MDateOpt[] =    L"{mdate}";
+const Char MTimeOpt[] =    L"{mtime}";
+const Char PageOpt[] =     L"{page}";
+const Char PagesOpt[] =    L"{pages}";
+const Char TodayOpt[] =    L"{today}";
+const Char NowOpt[] =      L"{now}";
+const Char OpenEscOpt[] =   L"{{";
+const Char CloseEscOpt[] =  L"}}";
+const Char UserNameOpt[] =  L"{user}";
 //---------------------------------------------------------------------------
 // TYcParserBase
 //---------------------------------------------------------------------------
@@ -52,7 +52,7 @@ TYcParserBase::~TYcParserBase()
 //---------------------------------------------------------------------------
 // return the index of a string from FOptList
 //
-bool TYcParserBase::Find(AnsiString option, int& i)
+bool TYcParserBase::Find(String option, int& i)
 {
   i = FOptList->IndexOf(option);
   return i >= 0;
@@ -61,7 +61,7 @@ bool TYcParserBase::Find(AnsiString option, int& i)
 // add a value to FOptList and a corresponding replacement value to
 // FSubstList
 //
-void TYcParserBase::Add(AnsiString option, AnsiString value)
+void TYcParserBase::Add(String option, String value)
 {
   FOptList->Add(option);
   FSubstList->Add(value);
@@ -69,7 +69,7 @@ void TYcParserBase::Add(AnsiString option, AnsiString value)
 //---------------------------------------------------------------------------
 // check whether FOptList has a value
 //
-bool TYcParserBase::Has(AnsiString option)
+bool TYcParserBase::Has(String option)
 {
   int i;
   return Find(option, i);
@@ -77,7 +77,7 @@ bool TYcParserBase::Has(AnsiString option)
 //---------------------------------------------------------------------------
 // remove a string from both FOptList and FSubstList
 //
-bool TYcParserBase::Remove(AnsiString option)
+bool TYcParserBase::Remove(String option)
 {
   int ndx;
   if (!Find(option, ndx)) return false;
@@ -89,7 +89,7 @@ bool TYcParserBase::Remove(AnsiString option)
 // locate a value in FOptList and change the corresponding value in
 // FSubstList
 //
-bool TYcParserBase::Change(AnsiString option, AnsiString newValue)
+bool TYcParserBase::Change(String option, String newValue)
 {
   int ndx;
   if (!Find(option, ndx)) return false;
@@ -100,17 +100,17 @@ bool TYcParserBase::Change(AnsiString option, AnsiString newValue)
 // check to see if the text in subStr matches the text the first characters in
 // str for the length of subStr
 //
-bool TYcParserBase::Compare(AnsiString str, AnsiString subStr, bool ignoreCase)
+bool TYcParserBase::Compare(String str, String subStr, bool ignoreCase)
 {
-  AnsiString s = str.SubString(1, subStr.Length());
-  if (ignoreCase) return !s.AnsiCompareIC(subStr);
-  return !s.AnsiCompare(subStr);
+  String s = str.SubString(1, subStr.Length());
+  if (ignoreCase) return !s.CompareIC(subStr);
+  return !s.Compare(subStr);
 }
 //---------------------------------------------------------------------------
 // locate the FOptList entry that matches the string in s; return -1 on no
 // match
 //
-int TYcParserBase::CompareFind(AnsiString s, bool ignoreCase)
+int TYcParserBase::CompareFind(String s, bool ignoreCase)
 {
   if (!s.Length()) return -1;
   int cnt = FOptList->Count;
@@ -122,10 +122,10 @@ int TYcParserBase::CompareFind(AnsiString s, bool ignoreCase)
 // walk through a string (format) replacing text that matches FOptList
 // entries with FSubstList values and return the new text string
 //
-AnsiString TYcParserBase::Parse(AnsiString format, bool ignoreCase)
+String TYcParserBase::Parse(String format, bool ignoreCase)
 {
-  AnsiString retVal;
-  AnsiString subStr;
+  String retVal;
+  String subStr;
   int pos = 1;
   int len = format.Length();
   int ndx;
@@ -149,7 +149,7 @@ AnsiString TYcParserBase::Parse(AnsiString format, bool ignoreCase)
 //---------------------------------------------------------------------------
 // TYcParser constructor
 //
-TYcParser::TYcParser(AnsiString dateFormat, AnsiString timeFormat)
+TYcParser::TYcParser(String dateFormat, String timeFormat)
 {
   FDateFormat = dateFormat;
   FTimeFormat = timeFormat;
@@ -178,7 +178,7 @@ TYcParser::TYcParser(AnsiString dateFormat, AnsiString timeFormat)
 // S.S. Note - YahCoLoRiZe now uses wide file-paths... but
 // it gets the equivalent short-path (all ansi) to set tae's FileName
 // property (which is really the full path)
-void TYcParser::SetName(AnsiString name, bool autoInit)
+void TYcParser::SetName(String name, bool autoInit)
 {
   // if not autoInit, simply copy name to the corresponding FSubstOpt
   // entry and return
@@ -190,13 +190,13 @@ void TYcParser::SetName(AnsiString name, bool autoInit)
 
   // autoInit was true so save the file name and assume that it will
   // also be the file title
-  AnsiString fileName = name;
-  AnsiString title = name;
+  String fileName = name;
+  String title = name;
 
   // if the file name was not "(untitled)", initialize the corresponding
   // FSubstOpt values for the long file name (full path), title (file name
   // without path), creation date, last modified date, etc.
-  if (name != AnsiString(TYcEdit::Untitled)) // S.S. modified
+  if (name != String(TYcEdit::Untitled)) // S.S. modified
   {
     bool bHaveFile = false;
 
@@ -231,7 +231,7 @@ void TYcParser::SetName(AnsiString name, bool autoInit)
 //---------------------------------------------------------------------------
 // set the value to be substituted for "{title}"
 //
-void TYcParser::SetTitle(AnsiString title)
+void TYcParser::SetTitle(String title)
 {
   Change(TitleOpt, title);
 }
@@ -240,19 +240,19 @@ void TYcParser::SetTitle(AnsiString title)
 //
 void TYcParser::SetPage(int page)
 {
-  Change(PageOpt, AnsiString(page));
+  Change(PageOpt, String(page));
 }
 //---------------------------------------------------------------------------
 // set the value to be substituted for "{pages}"
 //
 void TYcParser::SetPages(int pages)
 {
-  Change(PagesOpt, AnsiString(pages));
+  Change(PagesOpt, String(pages));
 }
 //---------------------------------------------------------------------------
 // set the values to be substituted for "{today}" and "{now}"
 //
-void TYcParser::SetDateTime(AnsiString dateOpt, AnsiString timeOpt, TDateTime dateTime)
+void TYcParser::SetDateTime(String dateOpt, String timeOpt, TDateTime dateTime)
 {
   Change(dateOpt, dateTime.FormatString(FDateFormat));
   Change(timeOpt, dateTime.FormatString(FTimeFormat));

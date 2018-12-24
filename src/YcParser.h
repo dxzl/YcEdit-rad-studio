@@ -25,33 +25,33 @@ protected:
   TStringList* FOptList;
   TStringList* FSubstList;
 
-  bool Find(AnsiString option, int& i);
+  bool Find(String option, int& i);
 
 public:
   TYcParserBase(void);
   ~TYcParserBase();
-  void Add(AnsiString option, AnsiString value = "");
-  bool Has(AnsiString option);
-  bool Remove(AnsiString option);
-  bool Change(AnsiString option, AnsiString newValue);
-  bool Compare(AnsiString str, AnsiString subStr, bool ignoreCase);
-  int CompareFind(AnsiString s, bool ignoreCase);
-  virtual AnsiString Parse(AnsiString format, bool ignoreCase = true);
+  void Add(String option, String value = "");
+  bool Has(String option);
+  bool Remove(String option);
+  bool Change(String option, String newValue);
+  bool Compare(String str, String subStr, bool ignoreCase);
+  int CompareFind(String s, bool ignoreCase);
+  virtual String Parse(String format, bool ignoreCase = true);
 };
 
 // TYcParser class - main text substitution parser class
 class PACKAGE TYcParser : public TYcParserBase
 {
 protected:
-  AnsiString FDateFormat;
-  AnsiString FTimeFormat;
+  String FDateFormat;
+  String FTimeFormat;
 
-  void SetDateTime(AnsiString dateOpt, AnsiString timeOpt, TDateTime dateTime);
+  void SetDateTime(String dateOpt, String timeOpt, TDateTime dateTime);
 
 public:
-  TYcParser(AnsiString dateFormat, AnsiString timeFormat);
-  void SetName(AnsiString name, bool autoInit = true);
-  void SetTitle(AnsiString title);
+  TYcParser(String dateFormat, String timeFormat);
+  void SetName(String name, bool autoInit = true);
+  void SetTitle(String title);
   void SetPage(int page);
   void SetPages(int pages);
   void SetCreated(TDateTime dateTime);
