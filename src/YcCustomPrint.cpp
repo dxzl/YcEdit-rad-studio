@@ -435,7 +435,7 @@ int __fastcall TYcCustomPrint::GetPrinterPageCount(void)
 //        https://msdn.microsoft.com/en-us/library/ms996492.aspx
 //
 // Called from TaePrintDialog.cpp from the Execute method
-bool TYcCustomPrint::PrintToPrinter(WideString spoolTitle, int startPage,
+bool TYcCustomPrint::PrintToPrinter(UnicodeString spoolTitle, int startPage,
                                         int endPage, int copies, bool collate)
 {
   if (FPageOffsets.size() <= 0)
@@ -457,7 +457,7 @@ bool TYcCustomPrint::PrintToPrinter(WideString spoolTitle, int startPage,
   FAbortPrint = false;
 
   // set printer spool title and  set up to print
-  Printer()->Title = spoolTitle; // Can't handle the WideString now! (S.S.)
+  Printer()->Title = spoolTitle;
   Printer()->BeginDoc(); // called before to ensure handle valid
 
 // need to debug this idea (to go unicode) - look at end of this file for a way

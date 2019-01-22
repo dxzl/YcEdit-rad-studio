@@ -36,7 +36,7 @@ class PACKAGE TYcPrintCancelDialog;
 class PACKAGE TYcPrintDialog : public TPrintDialog
 {
   private:
-    WideString FTitle;
+	UnicodeString FTitle;
 
 protected:
   TYcEdit* FRichEdit;
@@ -49,17 +49,17 @@ protected:
   void __fastcall PrintingEnded(TObject* Sender);
   void __fastcall AbortPrint(TObject* Sender);
   virtual void __fastcall Notification(TComponent* AComponent,
-    TOperation Operation);
+	TOperation Operation);
 
 public:
   __fastcall TYcPrintDialog(TYcEdit* Owner);
   __fastcall ~TYcPrintDialog(void);
-  virtual bool __fastcall TaeExecute(WideString wTitle = "");
+  virtual bool __fastcall TaeExecute(UnicodeString uTitle = "");
 
 __published:
   __property TYcEdit* TaeRichEdit = { read = FRichEdit, write = FRichEdit,
     default = 0 };
-  __property WideString Title = { read = FTitle, write = FTitle };
+  __property UnicodeString Title = { read = FTitle, write = FTitle };
 };
 //---------------------------------------------------------------------------
 #endif

@@ -12,10 +12,13 @@
 #define XX_1 5
 
 enum TSearchType2 { st2WholeWord, st2MatchCase, st2Backward };
-typedef Set<TSearchType2, stWholeWord, st2Backward> TSearchTypes2;
+typedef Set<TSearchType2, st2WholeWord, st2Backward> TSearchTypes2;
 
 typedef int TYcTabStops[MAX_TAB_STOPS];
 typedef enum { wwtNone, wwtWindow, wwtPrinter } TWordWrapTo;
+
+typedef void __fastcall (__closure *TYcEditUrlClick)(TObject* Sender, String urlText);
+typedef void __fastcall (__closure *TYcEditProtectEvent)(TObject* Sender, TWMNotify& Message);
 
 class PACKAGE TYcEdit : public TCustomRichEdit
 {
@@ -59,7 +62,6 @@ class PACKAGE TYcEdit : public TCustomRichEdit
     void __fastcall SetSelLength(int Value);
     int __fastcall GetSelLength(void);
     void __fastcall SetTabCount(int tabCount);
-    void __fastcall SetInsertMode(bool value);
     void __fastcall SetPosition(YCPOSITION pos);
     YCPOSITION __fastcall GetPosition(void);
     void SetWordWrapToPrinter(void);
@@ -68,21 +70,32 @@ class PACKAGE TYcEdit : public TCustomRichEdit
     void __fastcall SetPrintSupport(bool Value);
     void __fastcall Init(TComponent* Owner, String sName);
     void __fastcall ToggleInsertMode(void);
+    void __fastcall SetInsertMode(bool value);
+    void __fastcall SetAutoUrlDetect(bool value);
+    void __fastcall SetOnUrlClick(TNotifyEvent value);
+    void __fastcall SetEnableNotifications(bool enable);
+    void __fastcall ExecuteUrl(TObject* Sender, String urlText);
 
+    TYcEditProtectEvent FOnLinkEvent;
+    TYcEditUrlClick FOnUrlClick;
     TWordWrapTo FWordWrapTo;
     TYcPrint* FYcPrint;
+    bool FAutoUrlExecute;
 
     int FUndoLimit, FUndoLimitActual;
     int FTabCount, FTabWidth; // with in chars
     int FLockCounter, FView;
     long FOldLineCount, FOldLength;
-    bool FInsertMode, FRestoreSel;
+    bool FInsertMode, FRestoreSel, FAutoUrlDetect;
     bool FPrintSupport, FHideScrollBars, FHideSelection;
+    bool FEnableNotifications;
+
+    Classes::TNotifyEvent FOnInsertModeChange;
+    Classes::TNotifyEvent FSaveOnChange;
 
     TScrollStyle FScrollBars;
     YCPOSITION FSavePos;
     TYcTabStops FTabStops;
-    Classes::TNotifyEvent FSaveOnChange;
     String FFileName; // storage space for the file being edited (if any)
 
   protected:
@@ -90,6 +103,28 @@ class PACKAGE TYcEdit : public TCustomRichEdit
                                                 LONG cb, LONG FAR *pcb);
     static DWORD CALLBACK StreamInCallback(DWORD dwCookie, LPBYTE pbBuff,
                                                 LONG cb, LONG FAR *pcb);
+
+  DYNAMIC void __fastcall KeyDown(Word &Key, Classes::TShiftState Shift);
+
+  MESSAGE int __fastcall CNNotify(Messages::TWMNotify &Message);
+
+  //virtual void __fastcall CreateWnd(void);
+
+  // many days were wasted before I realized that I had to add the following
+  // message maps.  perhaps it was obvious, but I incorrectly assumed that
+  // the message handlers would be used if declared in the base....
+  BEGIN_MESSAGE_MAP
+//    VCL_MESSAGE_HANDLER(WM_NCDESTROY, TWMNCDestroy, WMNCDestroy)
+//    VCL_MESSAGE_HANDLER(CM_BIDIMODECHANGED, TMessage, CMBiDiModeChanged)
+//    VCL_MESSAGE_HANDLER(CM_FONTCHANGED, TMessage, CMFontChanged)
+//    VCL_MESSAGE_HANDLER(CM_COLORCHANGED, TMessage, CMColorChanged)
+//    VCL_MESSAGE_HANDLER(CM_TEXTCHANGED, TMessage, CMTextChanged)
+//    VCL_MESSAGE_HANDLER(WM_COMMAND, TWMCommand, WMCommand)
+    VCL_MESSAGE_HANDLER(CN_NOTIFY, TWMNotify, CNNotify)
+//    VCL_MESSAGE_HANDLER(WM_SETCURSOR, TWMSetCursor, WMSetCursor)
+//    VCL_MESSAGE_HANDLER(WM_PAINT, TWMPaint, WMPaint)
+//    VCL_MESSAGE_HANDLER(WM_SETFONT, TWMSetFont, WMSetFont)
+  END_MESSAGE_MAP(TCustomMemo)
 
   public:
     __fastcall TYcEdit(TComponent* Owner); // constructor
@@ -142,29 +177,29 @@ class PACKAGE TYcEdit : public TCustomRichEdit
   __property WideString SelTextW = { read = GetSelTextW, write = SetSelTextW };
   __property WideString TextW = { read = GetTextW, write = SetTextW };
   __property int UndoLimit  = { read = GetUndoLimit, write = SetUndoLimit };
-  __property long OldLineCount = { read = FOldLineCount, write = FOldLineCount };
-  __property long OldLength = { read = FOldLength, write = FOldLength };
-  __property int LockCounter = { read = FLockCounter, write = FLockCounter };
-  __property int View = { read = FView, write = FView };
   __property long TextLength = { read = GetTextLength }; // S.S. 5/28/15
-  __property int TabWidth = { read = FTabWidth, write = SetTabWidth };
-  __property int TabCount = { read = FTabCount, write = SetTabCount };
   __property long LineCount = { read = GetLineCount };
   __property TPoint ScrollPos = { read = GetScrollPos, write = SetScrollPos };
   __property TPoint CaretPos = { read = GetCaretPos, write = SetCaretPos };
   __property long Line = { read = GetLine, write = SetLine };
   __property long Column = { read = GetColumn, write = SetColumn };
-  __property Classes::TNotifyEvent SaveOnChange = { read = FSaveOnChange, write = FSaveOnChange, default = 0 };
-  __property bool InsertMode  = { read = FInsertMode, write = SetInsertMode, default = true };
   __property YCPOSITION Position = {read = GetPosition, write = SetPosition};
-  __property YCPOSITION SavePos = {read = FSavePos, write = FSavePos};
   // Don't want to restore SelStart and SelLength if it's become "unknown",
   // so the invoking class clears this flag...
+  __property int TabWidth = { read = FTabWidth, write = SetTabWidth };
+  __property int TabCount = { read = FTabCount, write = SetTabCount };
+  __property YCPOSITION SavePos = {read = FSavePos, write = FSavePos};
+  __property long OldLineCount = { read = FOldLineCount, write = FOldLineCount };
+  __property long OldLength = { read = FOldLength, write = FOldLength };
+  __property int LockCounter = { read = FLockCounter, write = FLockCounter };
+  __property int View = { read = FView, write = FView };
   __property bool RestoreSel = {write = FRestoreSel};
+  __property Classes::TNotifyEvent SaveOnChange = { read = FSaveOnChange, write = FSaveOnChange, default = 0 };
   __property TWordWrapTo WordWrapMode = { read = FWordWrapTo, write = SetWordWrapTo, default = wwtNone };
 //  __property TYcPrint* YcPrint = { read = FYcPrint, default = 0, stored = false };
   __property TYcPrint* YcPrint = { read = FYcPrint, default = 0 };
   __property String FileName = { read = FFileName,  write = FFileName };
+  __property bool EnableNotifications = { read = FEnableNotifications, write = SetEnableNotifications, default = true, stored = false };
 
 __published:
 
@@ -172,6 +207,12 @@ __published:
 // New custom properties
 //
   __property bool PrintSupport  = { read = FPrintSupport, write = SetPrintSupport, default = false };
+  __property bool InsertMode  = { read = FInsertMode, write = SetInsertMode, default = true };
+  __property bool AutoUrlDetect  = { read = FAutoUrlDetect, write = SetAutoUrlDetect, default = false };
+  __property bool AutoUrlExecute = { read = FAutoUrlExecute, write = FAutoUrlExecute, default = true };
+
+  __property TNotifyEvent OnInsertModeChange  = { read = FOnInsertModeChange, write = FOnInsertModeChange, default = 0 };
+  __property TYcEditUrlClick OnUrlClick = { read = FOnUrlClick, write = FOnUrlClick,  default = 0 };
 //------------------------------------
 // publish inherited properties
 //

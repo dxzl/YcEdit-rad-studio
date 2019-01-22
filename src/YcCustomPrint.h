@@ -57,6 +57,9 @@ typedef TYcPageOffsets TYcPageRange;
 
 typedef void __fastcall (__closure *TOnPageEvent)(TObject* Sender, HDC hdc, int page);
 
+// forward declarations
+class TYcEdit;
+
 class TYcCustomPrint : public TPersistent
 {
 friend class PACKAGE TYcEdit;
@@ -114,7 +117,7 @@ public:
 
   virtual void BeginRender(int maxPages);
   virtual void EndRender(void);
-  bool PrintToPrinter(WideString spoolTitle = "", int startPage = 1,
+  bool PrintToPrinter(UnicodeString spoolTitle = "", int startPage = 1,
     int endPage = MAXINT, int copies = 1, bool collate = false);
 
   TRect TwipsToRenderRect(TRect rect);

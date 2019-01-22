@@ -71,13 +71,13 @@ __fastcall TYcPrintDialog::~TYcPrintDialog(void)
 // override the TPrintDialog::Execute() function to add the TYcRichEdit
 // specifics
 //
-bool __fastcall TYcPrintDialog::TaeExecute(WideString wTitle)
+bool __fastcall TYcPrintDialog::TaeExecute(UnicodeString uTitle)
 {
   // verify that we have a TYcRichEdit to print and that it, in turn,
   // has a valid FRichEditPrint member.  simply return on failure.
   if (!FRichEdit || !FRichEdit->YcPrint) return false;
 
-  FTitle = wTitle;
+  FTitle = uTitle;
   FRichEditPrint = FRichEdit->YcPrint;
 
   // make sure that we have a print cancel dialog

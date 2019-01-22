@@ -60,18 +60,46 @@ __fastcall TYcEdit::TYcEdit(TComponent* Owner) : TCustomRichEdit(Owner)
 {
 //  this->dts = static_cast<TDTSColor*>(Owner);
 
+// TTaeRichEdit initializations
+  FInsertMode = true;
+  FUndoLimit = 100;
+  FUndoLimitActual = 0;
+  FAutoUrlDetect = false;
+  FOnUrlClick = 0;
+  FOnLinkEvent = 0;
+  FAutoUrlExecute = true;
+  FAutoUrlDetect = false;
+  FOnInsertModeChange = 0;
+  FWordWrapTo = wwtNone;
+  FTabWidth = 8;
+  FTabCount = 0;
+  FEnableNotifications = true;
+
   FHideSelection = true;
   FHideScrollBars = true;
   FInsertMode = true;
   FRestoreSel = false;
   FUndoLimit = 100;
   FUndoLimitActual = -1;
+  FOnLinkEvent = 0;
+  FOnUrlClick = 0;
 
   FFileName = "";
 
   FYcPrint = NULL;
   SetPrintSupport(FPrintSupport); // instantiate TYcPrint if needed
+
+  // set auto url detection to match property state (must be done *before*
+  // setting the text or streaming it in if it is to work on the loaded text)
+  SetAutoUrlDetect(FAutoUrlDetect);
+  SetEnableNotifications(FEnableNotifications); // enable ENM_LINK
 }
+//---------------------------------------------------------------------------
+//void __fastcall TYcEdit::CreateWnd(void)
+//{
+//  this->CreateWnd();
+//  SetEnableNotifications(FEnableNotifications); // enable ENM_LINK
+//}
 //---------------------------------------------------------------------------
 __fastcall TYcEdit::~TYcEdit()
 // destructor
@@ -985,34 +1013,6 @@ DWORD CALLBACK TYcEdit::StreamOutCallback(DWORD dwCookie, LPBYTE pbBuff,
     }
 }
 //---------------------------------------------------------------------------
-// note: SetInsertMode() does not trigger an OnInsertChange event
-//
-void __fastcall TYcEdit::SetInsertMode(bool value)
-{
-  if (FInsertMode != value) return;
-  FInsertMode = value;
-  ToggleInsertMode();
-}
-//---------------------------------------------------------------------------
-// note: ToggleInsertMode() does not trigger an OnInsertChange event --
-// the FInsertMode member shadow variable gets flipped in the KeyDown()
-// handler
-//
-void __fastcall TYcEdit::ToggleInsertMode(void)
-{
-  // synthesize an insert keystroke (cannot use keybd_event() because
-  // there is no window associated with the API function)
-  if (!Handle) return;
-  // save and clear the event handler
-//  TNotifyEvent event = FOnInsertModeChange;
-//  FOnInsertModeChange = 0;
-  // the following was glommed from a Micro$oft VB example
-  ::SendMessage(Handle, WM_KEYDOWN, VK_INSERT, 0x00510001);
-  ::SendMessage(Handle, WM_KEYUP, VK_INSERT, 0xC0510001);
-  // restore the event handler
-//  FOnInsertModeChange = event;
-}
-//---------------------------------------------------------------------------
 void __fastcall TYcEdit::SetLocation(int Left, int Top, int Width, int Height)
 {
   this->Left = Left;
@@ -1289,6 +1289,313 @@ void __fastcall TYcEdit::SetHideSelection(bool Value)
   if (HideSelection == Value) return;
   FHideSelection = Value;
   ::SendMessage(Handle, EM_HIDESELECTION, HideSelection, (LPARAM) true);
+}
+//---------------------------------------------------------------------------
+// track insert/overstrike state
+//
+void __fastcall TYcEdit::KeyDown(Word &Key, Classes::TShiftState Shift)
+{
+  TCustomRichEdit::KeyDown(Key, Shift);
+
+  TShiftState noShiftKeys;
+  if (Key == VK_INSERT && Shift == noShiftKeys) {
+    FInsertMode = !FInsertMode;
+    if (FOnInsertModeChange) FOnInsertModeChange(this);
+    }
+}
+//---------------------------------------------------------------------------
+// execute a URL or any other program or document which has a program
+// association.  for example, ExecuteUrl(this, "http://www.something.com")
+// will start the default browser (it must be installed -- no error checking)
+// and try to load the www.something.com site.  ExecuteUrl(this, "wordpad.exe")
+// will try to load and run WordPad.exe.  ExecuteUrl(this, "somedoc.txt")
+// will run NotePad.exe (or whatever is associated with *.txt files) and
+// load somedoc.txt into the program.
+//
+void __fastcall TYcEdit::ExecuteUrl(TObject* Sender, String urlText)
+{
+  // execute the link
+  ::ShellExecuteW(NULL, L"open", urlText.w_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+//---------------------------------------------------------------------------
+// note: SetInsertMode() does not trigger an OnInsertChange event
+//
+void __fastcall TYcEdit::SetInsertMode(bool value)
+{
+  if (FInsertMode != value) return;
+  FInsertMode = value;
+  ToggleInsertMode();
+}
+//---------------------------------------------------------------------------
+// note: ToggleInsertMode() does not trigger an OnInsertChange event --
+// the FInsertMode member shadow variable gets flipped in the KeyDown()
+// handler
+//
+void __fastcall TYcEdit::ToggleInsertMode(void)
+{
+  // synthesize an insert keystroke (cannot use keybd_event() because
+  // there is no window associated with the API function)
+  if (!Handle) return;
+  // save and clear the event handler
+//  TNotifyEvent event = FOnInsertModeChange;
+//  FOnInsertModeChange = 0;
+  // the following was glommed from a Micro$oft VB example
+  ::SendMessage(Handle, WM_KEYDOWN, VK_INSERT, 0x00510001);
+  ::SendMessage(Handle, WM_KEYUP, VK_INSERT, 0xC0510001);
+  // restore the event handler
+//  FOnInsertModeChange = event;
+}
+//---------------------------------------------------------------------------
+// enable or disable event handling -  useful to disable certain events from
+// firing while syntax highlighting, for example.  (this completely disables
+// the events so that the control never generates the internal notifications
+// and, thereby, eliminates execution of some additional code beyond setting
+// each OnXXX handler to null.)  in other words, if you are changing text
+// or text attributes programmatically, use this to speed things up as much
+// as possible.
+//
+//ENM_CHANGE
+//  Sends EN_CHANGE notifications.
+//ENM_CLIPFORMAT
+//  Sends EN_CLIPFORMAT notifications.
+//ENM_CORRECTTEXT
+//  Sends EN_CORRECTTEXT notifications.
+//ENM_DRAGDROPDONE
+//  Sends EN_DRAGDROPDONE notifications.
+//ENM_DROPFILES
+//  Sends EN_DROPFILES notifications.
+//ENM_IMECHANGE
+//  Microsoft Rich Edit 1.0 only: Sends EN_IMECHANGE notifications when the IME
+//  conversion status has changed. Only for Asian-language versions of the
+//  operating system.
+//ENM_KEYEVENTS
+//  Sends EN_MSGFILTER notifications for keyboard events.
+//ENM_LINK
+//  Rich Edit 2.0 and later: Sends EN_LINK notifications when the mouse pointer
+//  is over text that has the CFE_LINK and one of several mouse actions is
+//  performed.
+//ENM_LOWFIRTF
+//  Sends EN_LOWFIRTF notifications.
+//ENM_MOUSEEVENTS
+//  Sends EN_MSGFILTER notifications for mouse events.
+//ENM_OBJECTPOSITIONS
+//  Sends EN_OBJECTPOSITIONS notifications.
+//ENM_PARAGRAPHEXPANDED
+//  Sends EN_PARAGRAPHEXPANDED notifications.
+//ENM_PROTECTED
+//  Sends EN_PROTECTED notifications.
+//ENM_REQUESTRESIZE
+//  Sends EN_REQUESTRESIZE notifications.
+//ENM_SCROLL
+//  Sends EN_HSCROLL and EN_VSCROLL notifications.
+//ENM_SCROLLEVENTS
+//  Sends EN_MSGFILTER notifications for mouse wheel events.
+//ENM_SELCHANGE
+//  Sends EN_SELCHANGE notifications.
+//  This notification code is sent when the caret position changes and no text is
+//  selected (the selection is empty). The caret position can change when the user
+//  clicks the mouse, types, or presses an arrow key.
+//ENM_UPDATE
+//  Sends EN_UPDATE notifications.
+//  Rich Edit 2.0 and later: this flag is ignored and the EN_UPDATE notifications
+//   are always sent. However, if Rich Edit 3.0 emulates Microsoft Rich Edit 1.0,
+//   you must use this flag to send EN_UPDATE notifications.
+//
+//Remarks:
+//  The default event mask is ENM_NONE in which case no notifications are sent
+//  to the parent window. You can retrieve and set the event mask for a rich
+//  edit control by using the EM_GETEVENTMASK and EM_SETEVENTMASK messages.
+void __fastcall TYcEdit::SetEnableNotifications(bool enable)
+{
+  // preserve other events
+  unsigned long mask = ::SendMessage(Handle, EM_GETEVENTMASK, 0, 0);
+
+//  if (enable)  mask |= ENM_CHANGE | ENM_SELCHANGE | ENM_REQUESTRESIZE |
+//    ENM_PROTECTED | ENM_LINK | ENM_CORRECTTEXT | ENM_UPDATE;
+//  else mask &= ~(ENM_CHANGE | ENM_SELCHANGE | ENM_REQUESTRESIZE |
+//    ENM_PROTECTED | ENM_LINK | ENM_CORRECTTEXT | ENM_UPDATE);
+  if (enable)  mask |= ENM_LINK;
+  else mask &= ~(ENM_LINK);
+
+  ::SendMessage(Handle, EM_SETEVENTMASK, 0, (LPARAM) mask);
+  FEnableNotifications = enable;
+}
+//---------------------------------------------------------------------------
+// turn on/off auto detection of urls
+//
+void __fastcall TYcEdit::SetAutoUrlDetect(bool value)
+{
+  // set the shadow variable
+  FAutoUrlDetect = value;
+
+  // if in design mode, do not auto-detect
+  if (ComponentState.Contains(csDesigning)) return;
+
+  // tell the RE to auto detect or ignore URLs
+  ::SendMessage(Handle, EM_AUTOURLDETECT, value, (LPARAM) 0);
+
+//
+// must remove this optimization for OnLinkEvent to work when AutoUrlDetect = false
+//
+//  // get the current event notification mask
+//  unsigned int mask = ::SendMessage(Handle, EM_GETEVENTMASK, 0, 0);
+//
+//  // set or clear the link notification bit
+//  if (value) mask |= ENM_LINK;
+//  else mask &= ~(ENM_LINK);
+//
+//  // set the new event notification mask
+//  ::SendMessage(Handle, EM_SETEVENTMASK, 0, mask);
+}
+//---------------------------------------------------------------------------
+// handler for CN_NOTIFY messages
+//
+// the following structures and typedefs are already defined and here only as
+// reference....
+//
+// struct TWMNotify {
+//    unsigned Msg;
+//    int IDCtrl;
+//    tagNMHDR *NMHdr;
+//    int Result;
+//     };
+//
+//  typedef struct tagNMHDR {
+//    HWND hwndFrom;
+//    UINT idFrom;
+//    UINT code;
+//    } NMHDR;
+//
+//  typedef struct _enlink {
+//    NMHDR nmhdr;
+//    UINT msg;
+//    WPARAM wParam;
+//    LPARAM lParam;
+//    CHARRANGE chrg;
+//    } ENLINK;
+//
+//  typedef struct _enprotected {
+//    NMHDR nmhdr;
+//    UINT msg;
+//    WPARAM wParam;
+//    LPARAM lParam;
+//    CHARRANGE chrg;
+//    } ENPROTECTED;
+//
+int __fastcall TYcEdit::CNNotify(TWMNotify& Message)
+{
+  switch (Message.NMHdr->code)
+  {
+//    case EN_UPDATE: // Don't forget to set the ENM_UPDATE flag!
+//      UpdateEvent();
+////      ::SendMessage(Handle, EM_EXGETSEL, &FColumn, NULL); // S.S. 5/2015
+//      break;
+//
+//    case EN_SELCHANGE:
+//      SelectionChange();
+//    break;
+//
+//    case EN_REQUESTRESIZE:
+//      RequestSize(((TReqSize*) Message.NMHdr)->rc);
+//    break;
+//
+//    case EN_SAVECLIPBOARD:
+//      if (!SaveClipboard(((TENSaveClipboard*) Message.NMHdr)->cObjectCount,
+//        ((TENSaveClipboard*) Message.NMHdr)->cch))
+//        Message.Result = 1;    // do not save
+//    break;
+//
+//    // note: the following code handles EN_PROTECTED notifications and
+//    // passes them to the OnProtectEvent (first) and OnProtectedChange
+//    // (second) handlers.
+//    case EN_PROTECTED:
+//      // note: the OnProtectEvent handler should set the return value in
+//      // Message.Result to 0 to continue processing the message
+//      if (FOnProtectEvent)
+//      {
+//        FOnProtectEvent(this, Message);
+//        if (!FOnProtectChange) return;
+//      }
+//
+//      if (!ProtectChange(((TENProtected*) Message.NMHdr)->chrg.cpMin,
+//                            ((TENProtected*) Message.NMHdr)->chrg.cpMax))
+//        Message.Result = 1;    // do not allow change
+//    break;
+
+// can't get this to fire (S.S.)
+//    case EN_CHANGE: // Get the CHANGENOTIFY Struct
+//      // note: the OnChangeEvent handler should set the return value in
+//      // Message.Result to 0 to continue processing the message
+//      if (FOnChangeEvent)
+//      {
+//        FOnChangeEvent(this, Message);
+//        if (!FOnChangeEvent) return;
+//      }
+//
+//      if (!EditChange(((TENChangeNotify*) Message.NMHdr)->dwChangeType,
+//                            ((TENChangeNotify*) Message.NMHdr)->pvCookieData))
+//        Message.Result = 1;    // do not allow change
+//      break;
+
+    // note: the following code handles EN_LINK notifications and
+    // passes them to the OnLinkEvent (first) and OnUrlClick (second)
+    // handlers.
+    case EN_LINK:
+      // S.S. This is called when you even hover the mouse over a link!!!
+      // note: the OnLinkEvent handler should set the return value in
+      // Message.Result to 0 to continue processing the message
+      if (FOnLinkEvent)
+      {
+        FOnLinkEvent(this, Message);
+
+        if (!FOnUrlClick)
+          return 0;
+      }
+
+      // is this a left button down notification that we will handle?
+      TENLink& enLink = *((TENLink*) Message.NMHdr);
+
+      if (enLink.msg == WM_LBUTTONDOWN && (FAutoUrlExecute || FOnUrlClick))
+      {
+        // select the text
+        ::SendMessage(Handle, EM_EXSETSEL, 0, (LPARAM) &enLink.chrg);
+
+        // S.S. MODIFIED 8/2013 to handle wide characters!!!!!!!!!!!
+
+        int len = enLink.chrg.cpMax - enLink.chrg.cpMin + 1;
+
+        // allocate a wide-char buffer for the text
+        wchar_t* buf = new wchar_t[len];
+
+        // get the text
+        ::SendMessage(Handle, EM_GETSELTEXT, 0, (LPARAM)buf);
+
+        buf[len-1] = '\0';
+
+        // copy text into a WideString
+        WideString linkText(buf);
+
+        delete [] buf;
+
+//        linkText.Unique();
+
+        // if an OnUrlClick handler is installed, call it
+        if (FOnUrlClick)
+          FOnUrlClick(this, linkText);
+
+        // if the AutoUrlExecute property is (still) set, execute the link
+        if (FAutoUrlExecute)
+          ExecuteUrl(this, linkText);
+
+        // return non-zero to tell the RE that we handled this message
+        Message.Result = 1;
+
+        return 1;
+      }
+    break;
+  }
+
+  return 0;
 }
 //---------------------------------------------------------------------------
 
