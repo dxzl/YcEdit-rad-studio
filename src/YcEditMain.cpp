@@ -83,6 +83,7 @@ __fastcall TYcEdit::TYcEdit(TComponent* Owner) : TCustomRichEdit(Owner)
   FUndoLimitActual = -1;
   FOnLinkEvent = 0;
   FOnUrlClick = 0;
+  FScrollBars = ssBoth;
 
   FFileName = "";
 
@@ -1228,13 +1229,13 @@ void __fastcall TYcEdit::SetWordWrapTo(TWordWrapTo wwtType)
 
   // only need horizontal scroll bars if wrapping to window
   if (FScrollBars == ssNone)
-    ScrollBars = ssNone;
+    this->ScrollBars = ssNone;
   else if (FScrollBars == ssVertical)
-    ScrollBars = ssVertical;
+    this->ScrollBars = ssVertical;
   else if (FScrollBars == Vcl::Stdctrls::ssHorizontal)
-    ScrollBars = (wwtType == wwtWindow) ? ssVertical : ssNone;
+    this->ScrollBars = (wwtType == wwtWindow) ? ssVertical : ssNone;
   else if (FScrollBars == ssBoth)
-    ScrollBars = (wwtType == wwtWindow) ? ssVertical : ssBoth;
+    this->ScrollBars = (wwtType == wwtWindow) ? ssVertical : ssBoth;
 
   FWordWrapTo = wwtType;
 }
@@ -1247,11 +1248,11 @@ TWordWrapTo __fastcall TYcEdit::GetWordWrapTo(void)
 }
 //---------------------------------------------------------------------------
 // set ScrollBars
-//void __fastcall TYcEdit::SetScrollBars(TScrollStyle Value)
-//{
-//  FScrollBars = Value;
-//  ScrollBars = FScrollBars;
-//}
+void __fastcall TYcEdit::SetScrollBars(TScrollStyle Value)
+{
+  FScrollBars = Value;
+  ScrollBars = FScrollBars; // set the base object's ScrollBars property
+}
 //---------------------------------------------------------------------------
 void __fastcall TYcEdit::SetPrintSupport(bool Value)
 {

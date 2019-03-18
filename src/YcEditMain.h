@@ -54,7 +54,7 @@ class PACKAGE TYcEdit : public TCustomRichEdit
     void __fastcall SetScrollPos(TPoint pt);
     void __fastcall SetHideSelection(bool Value);
     void __fastcall SetHideScrollBars(bool Value);
-//  void __fastcall SetScrollBars(TScrollStyle Value);
+    void __fastcall SetScrollBars(TScrollStyle Value);
     TPoint __fastcall GetCaretPos(void);
     int __fastcall GetTabWidthTwips(void);
     void __fastcall SetTabWidth(int tabWidth);
@@ -167,7 +167,6 @@ class PACKAGE TYcEdit : public TCustomRichEdit
     bool __fastcall FindTextEx(String text, int startPos,
             TSearchTypes2 searchOptions, int& foundPos, int& foundLength);
 
-//  __property TScrollStyle ScrollBars = { read = FScrollBars, write = SetScrollBars };
   __property TWordWrapTo WordWrapTo = { read = GetWordWrapTo, write = SetWordWrapTo };
   __property int TabWidthTwips = { read = GetTabWidthTwips };
   __property int SelLength = { read = GetSelLength, write = SetSelLength };
@@ -232,6 +231,7 @@ __published:
   __property Enabled;
   __property Font;
   __property HideScrollBars;
+  __property ScrollBars;
   __property HideSelection;
   __property ImeMode;
   __property ImeName;
@@ -246,7 +246,6 @@ __published:
   __property PlainText;
   __property PopupMenu;
   __property ReadOnly;
-  __property ScrollBars;
   __property ShowHint;
   __property TabOrder;
   __property TabStop;
