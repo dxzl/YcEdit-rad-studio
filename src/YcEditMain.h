@@ -9,8 +9,6 @@
 #include "YcPrint.h"
 #include "YcPosition.h"
 
-#define XX_1 5
-
 enum TSearchType2 { st2WholeWord, st2MatchCase, st2Backward };
 typedef Set<TSearchType2, st2WholeWord, st2Backward> TSearchTypes2;
 
@@ -124,7 +122,7 @@ class PACKAGE TYcEdit : public TCustomRichEdit
 //    VCL_MESSAGE_HANDLER(WM_SETCURSOR, TWMSetCursor, WMSetCursor)
 //    VCL_MESSAGE_HANDLER(WM_PAINT, TWMPaint, WMPaint)
 //    VCL_MESSAGE_HANDLER(WM_SETFONT, TWMSetFont, WMSetFont)
-  END_MESSAGE_MAP(TCustomMemo)
+  END_MESSAGE_MAP(TCustomRichEdit)
 
   public:
     __fastcall TYcEdit(TComponent* Owner); // constructor

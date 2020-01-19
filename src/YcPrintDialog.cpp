@@ -96,19 +96,19 @@ bool __fastcall TYcPrintDialog::TaeExecute(UnicodeString uTitle)
   MaxPage = FRichEditPrint->PageCount; // invokes GetPageCount
   ToPage = MaxPage;
 
-  Options.Clear();
+  this->Options.Clear();
 
   if (FRichEdit->SelLength)
   {
-    Options << poSelection << poPageNums; // Enable page-nums range and select
-    PrintRange << prSelection;
+    this->Options << poSelection << poPageNums; // Enable page-nums range and select
+    this->PrintRange << prSelection;
   }
   else if (MaxPage == 1)
-    PrintRange << prAllPages;
+    this->PrintRange << prAllPages;
   else
   {
     Options << poPageNums; // Enable page-nums range
-    PrintRange << prAllPages;
+    this->PrintRange << prAllPages;
   }
 
   // if selection range active in rich edit, allow printing of selection
