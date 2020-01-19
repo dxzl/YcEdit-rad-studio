@@ -1,6 +1,2 @@
 # YcEdit-rad-studio
-Rich edit component for RAD Studio derived from TCustomRichEdit for YahCoLoRiZe-rad-studio
-
-This is the YahCoLoRiZe-rad-studio edit-control component for Embarcadero RAD Studio (Tokyo) free edition. It is derived from TCustomRichEdit.
-
-(Note: To build and install, open the project in RAD Studio, right-click on YcEditPackage.bpl and click Install)
+Rich edit component for RAD Studio C++ Builder Community Edition. Derived from TCustomRichEdit for YahCoLoRiZe-rad-studio. To build and install, open the project in RAD Studio, right-click on YcEditPackage.bpl and click Install. If RAD Studio crashes when you try to pick and drop the component onto your Windows Forms project, reopen YcEditPackage, open Project->Options->Project Properties->General and uncheck Verify Package Imports and Libraries. Right-click YcEditPackage.bpl and click Clean, then Install. Now open your project and try to drop the component again. Hope this helps! - S.S.
